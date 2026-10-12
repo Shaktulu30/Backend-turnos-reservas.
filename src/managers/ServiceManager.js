@@ -23,7 +23,7 @@ export class ServiceManager {
       nuevoId = Math.max(...ids) + 1;
     }
 
-    const nuevoService = { id: nuevoId, ...service };
+    const nuevoService = { ...service, id: nuevoId };
 
     this.services.push(nuevoService);
 

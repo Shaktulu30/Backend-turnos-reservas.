@@ -1,6 +1,6 @@
-# Backend Turnos y Reservas - Pre-entrega 1
+# Backend Turnos y Reservas - Pre-entrega 2
 
-Administrador de servicios para un sistema de turnos y reservas, hecho con Node.js y módulos ESM. Gestiona servicios en memoria a través de una clase `ServiceManager` (crear, listar, buscar, actualizar y eliminar).
+API REST para un sistema de turnos y reservas, hecha con Node.js, Express y módulos ESM. Expone endpoints para gestionar el recurso `services` (crear, listar, buscar, actualizar y eliminar). La lógica de servicios vive en la clase `ServiceManager` y los datos se manejan en memoria.
 
 ## Instalación
 
@@ -13,8 +13,10 @@ npm install
 ## Ejecución
 
 ```bash
-node app.js
+node src/server.js
 ```
+
+El servidor queda escuchando en `http://localhost:PORT` (por defecto 8080).
 
 ## Variables de entorno
 
@@ -33,18 +35,43 @@ Cada servicio tiene esta forma:
 { id, name, description, duration, price, category, available }
 ```
 
-- `id` — identificador único, se genera automáticamente
-- `name` — nombre del servicio
-- `description` — descripción
-- `duration` — duración en minutos
-- `price` — precio
-- `category` — categoría
-- `available` — disponibilidad (true/false)
+El `id` se genera automáticamente; no se envía en el body.
 
-## Métodos del ServiceManager
+## Endpoints
 
-- `getServices()` — devuelve todos los servicios
-- `getServiceById(id)` — devuelve un servicio por id
-- `addService(data)` — crea un servicio (genera el id, valida campos obligatorios)
-- `updateService(id, data)` — actualiza un servicio sin permitir cambiar el id
-- `deleteService(id)` — elimina un servicio
+Base: `/api/services`
+
+| Método | Ruta | Descripción | Éxito | Error |
+|--------|------|-------------|-------|-------|
+| GET | `/api/services` | Lista todos los servicios | 200 | — |
+| GET | `/api/services/:sid` | Devuelve un servicio por id | 200 | 404 si no existe |
+| POST | `/api/services` | Crea un servicio | 201 | 400 si faltan campos |
+| PUT | `/api/services/:sid` | Actualiza un servicio (no cambia el id) | 200 | 404 si no existe |
+| DELETE | `/api/services/:sid` | Elimina un servicio | 200 | 404 si no existe |
+
+### Ejemplo de body (POST / PUT)
+
+```json
+{
+  "name": "Consulta general",
+  "description": "Consulta inicial",
+  "duration": 30,
+  "price": 12000,
+  "category": "salud",
+  "available": true
+}
+```
+
+Las respuestas siguen el formato `{ "status": "success" | "error", "payload" | "message": ... }`.
+
+## Estructura del proyecto
+
+```
+src/
+  app.js                     configura Express y monta el router
+  server.js                  levanta el servidor
+  config/env.config.js       variables de entorno
+  managers/ServiceManager.js lógica de servicios
+  routes/services.router.js  endpoints del recurso services
+  data/services.json         persistencia (uso futuro)
+```
