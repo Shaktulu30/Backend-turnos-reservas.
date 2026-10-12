@@ -1,9 +1,29 @@
+import fs from "fs/promises";
 export class ServiceManager {
   constructor() {
-    this.services = [];
+    this.path = "./src/data/services.json";
   }
 
-  addService(service) {
+  async readServices() {
+    try {
+      const data = await fs.readFile(this.path, "utf-8");
+      return JSON.parse(data);
+    } catch (error) {
+      console.log("Error al leer el archivo", error.message);
+      return [];
+    }
+  }
+
+  async writeServices(services) {
+    try {
+      const jsonData = JSON.stringify(services, null, 2);
+      await fs.writeFile(this.path, jsonData, "utf-8");
+    } catch (error) {
+      console.log("Error al escribir el archivo", error.message);
+    }
+  }
+
+  async addService(service) {
     if (
       !service.name ||
       !service.description ||
@@ -15,23 +35,30 @@ export class ServiceManager {
       return { error: "Todos los campos son obligatorios" };
     }
 
+    const services = await this.readServices();
+
     let nuevoId;
-    if (this.services.length === 0) {
+    if (services.length === 0) {
       nuevoId = 1;
     } else {
-      const ids = this.services.map((s) => s.id);
+      const ids = services.map((s) => s.id);
       nuevoId = Math.max(...ids) + 1;
     }
 
     const nuevoService = { ...service, id: nuevoId };
 
-    this.services.push(nuevoService);
+    services.push(nuevoService);
+
+    await this.writeServices(services);
 
     return nuevoService;
   }
 
-  getServiceById(id) {
-    const service = this.services.find((s) => s.id === id);
+  async getServiceById(id) {
+
+    const services = await this.readServices();
+
+    const service = services.find((s) => s.id === id);
 
     if (service === undefined) {
       return { error: "Servicio no encontrado" };
@@ -40,28 +67,44 @@ export class ServiceManager {
     return service;
   }
 
-  updateService(id, data) {
-    const index = this.services.findIndex((s) => s.id === id);
+  async updateService(id, data) {
+
+    const services = await this.readServices();
+    
+    const index = services.findIndex((s) => s.id === id);
     if (index === -1) {
       return { error: "Servicio no encontrado" };
     }
 
-    const actualizadoService = { ...this.services[index], ...data, id: this.services[index].id };
-    this.services[index] = actualizadoService;
+    const actualizadoService = {
+      ...services[index],
+      ...data,
+      id: services[index].id,
+    };
+    services[index] = actualizadoService;
+
+    await this.writeServices(services);
+
     return actualizadoService;
   }
 
-  deleteService(id) {
-    const index = this.services.findIndex((s) => s.id === id);
+  async deleteService(id) {
+
+    const services = await this.readServices();
+
+    const index = services.findIndex((s) => s.id === id);
     if (index === -1) {
       return { error: "Servicio no encontrado" };
     }
 
-    this.services.splice(index, 1);
+    services.splice(index, 1);
+
+    await this.writeServices(services);
+
     return { message: "Servicio eliminado correctamente" };
   }
 
-  getServices() {
-    return this.services;
+  async getServices() {
+    return await this.readServices();
   }
 }

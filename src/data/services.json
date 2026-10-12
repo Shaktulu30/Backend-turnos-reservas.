@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "name": "Clase de funcional",
+    "description": "Entrenamiento funcional grupal",
+    "duration": 60,
+    "price": 8000,
+    "category": "grupal",
+    "available": true,
+    "id": 1
+  }
+]
