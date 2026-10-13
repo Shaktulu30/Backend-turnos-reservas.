@@ -7,5 +7,14 @@
     "category": "grupal",
     "available": true,
     "id": 1
+  },
+  {
+    "name": "Musculación",
+    "description": "Entrenamiento de fuerza",
+    "duration": 60,
+    "price": 15000,
+    "category": "fuerza",
+    "available": true,
+    "id": 2
   }
 ]
