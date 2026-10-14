@@ -1,4 +1,3 @@
-
 export default class ServiceDAO {
   constructor(model) {
     this.model = model;
@@ -21,7 +20,17 @@ export default class ServiceDAO {
   }
 
   async delete(id) {
-    const deleted = await this.model.findByIdAndDelete(id)
+    const deleted = await this.model.findByIdAndDelete(id);
     return deleted ? true : null;
+  }
+
+  async getPaginated(filter, { skip, limit, sort }) {
+    const docs = await this.model
+      .find(filter)
+      .skip(skip)
+      .limit(limit)
+      .sort(sort);
+    const total = await this.model.countDocuments(filter);
+    return { docs, total };
   }
 }

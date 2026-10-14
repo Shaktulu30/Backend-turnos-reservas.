@@ -1,6 +1,6 @@
 export default class ServiceRepository {
   constructor(dao) {
-    this.dao = dao; 
+    this.dao = dao;
   }
 
   getAll() {
@@ -21,5 +21,9 @@ export default class ServiceRepository {
 
   delete(id) {
     return this.dao.delete(id);
+  }
+
+  getPaginated(filter, options) {
+    return this.dao.getPaginated(filter, options);
   }
 }

@@ -9,14 +9,6 @@ export default class BookingService {
   }
 
   async create(booking) {
-    if (
-      !booking.clientName ||
-      !booking.clientEmail ||
-      !booking.date ||
-      !booking.time
-    ) {
-      return { error: "Todos los campos son obligatorios" };
-    }
     const newBooking = { ...booking, status: "pending", services: [] };
     return await this.repository.create(newBooking);
   }

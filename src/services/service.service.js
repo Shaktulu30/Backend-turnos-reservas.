@@ -8,15 +8,6 @@ export default class ServiceService {
   }
 
   async create(service) {
-    if (
-      !service.name ||
-      !service.description ||
-      !service.duration ||
-      !service.price ||
-      !service.category
-    ) {
-      return { error: "Todos los campos son obligatorios" };
-    }
     return await this.repository.create(service);
   }
 
@@ -42,5 +33,41 @@ export default class ServiceService {
       return { error: "Servicio no encontrado" };
     }
     return { message: "Servicio eliminado correctamente" };
+  }
+
+  async getPaginated(query = {}) {
+    const { category, available, page = 1, limit = 10, sortBy, order } = query;
+
+    // filtro
+    const filter = {};
+    if (category) filter.category = category;
+    if (available !== undefined) filter.available = available === "true";
+
+    // paginación
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // ordenamiento
+    const sort = {};
+    if (sortBy) sort[sortBy] = order === "desc" ? -1 : 1;
+
+    const { docs, total } = await this.repository.getPaginated(filter, {
+      skip,
+      limit: limitNum,
+      sort,
+    });
+
+    const totalPages = Math.ceil(total / limitNum);
+
+    return {
+      payload: docs,
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages,
+      hasPrevPage: pageNum > 1,
+      hasNextPage: pageNum < totalPages,
+    };
   }
 }

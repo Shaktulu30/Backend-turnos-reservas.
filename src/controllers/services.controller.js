@@ -1,8 +1,8 @@
 import { serviceService } from "../config/container.js";
 
 export const getServices = async (req, res) => {
-  const services = await serviceService.getAll();
-  res.status(200).json({ status: "success", payload: services });
+  const result = await serviceService.getPaginated(req.query);
+  res.status(200).json({ status: "success", ...result });
 };
 
 export const addService = async (req, res) => {
@@ -43,6 +43,8 @@ export const deleteService = async (req, res) => {
   if (resultado.error) {
     res.status(404).json({ status: "error", message: resultado.error });
   } else {
-    res.status(200).json({ status: "success", message: "Servicio eliminado correctamente" });
+    res
+      .status(200)
+      .json({ status: "success", message: "Servicio eliminado correctamente" });
   }
 };
