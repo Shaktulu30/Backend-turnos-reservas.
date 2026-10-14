@@ -13,8 +13,7 @@ export default class ServiceService {
       !service.description ||
       !service.duration ||
       !service.price ||
-      !service.category ||
-      service.available === undefined
+      !service.category
     ) {
       return { error: "Todos los campos son obligatorios" };
     }

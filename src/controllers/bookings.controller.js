@@ -11,7 +11,7 @@ export const createBooking = async (req, res) => {
 };
 
 export const getBookingById = async (req, res) => {
-  const bookingId = Number(req.params.bid);
+  const bookingId = req.params.bid;
   const booking = await bookingService.getById(bookingId);
   if (booking.error) {
     res.status(404).json({ status: "error", message: booking.error });
@@ -21,8 +21,8 @@ export const getBookingById = async (req, res) => {
 };
 
 export const addServiceToBooking = async (req, res) => {
-  const bid = Number(req.params.bid);
-  const sid = Number(req.params.sid);
+  const bid = req.params.bid;
+  const sid = req.params.sid;
   const resultado = await bookingService.addServiceToBooking(bid, sid);
   if (resultado.error) {
     res.status(404).json({ status: "error", message: resultado.error });

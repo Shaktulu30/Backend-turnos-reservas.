@@ -40,7 +40,7 @@ export default class BookingService {
       return { error: "Servicio no encontrado" };
     }
 
-    const existente = booking.services.find((item) => item.service === sid);
+    const existente = booking.services.find((item) => item.service.equals(sid));
     if (existente) {
       existente.quantity++;
     } else {

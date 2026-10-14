@@ -4,12 +4,14 @@ import ServiceService from "../services/service.service.js";
 import BookingDAO from "../dao/booking.dao.js";
 import BookingRepository from "../repositories/booking.repository.js";
 import BookingService from "../services/booking.service.js";
+import { ServiceModel }from "../dao/models/service.model.js"
+import { BookingModel } from "../dao/models/booking.model.js"
 
-const serviceDAO = new ServiceDAO("./src/data/services.json");
+const serviceDAO = new ServiceDAO(ServiceModel);
 const serviceRepository = new ServiceRepository(serviceDAO);
 const serviceService = new ServiceService(serviceRepository);
 
-const bookingDAO = new BookingDAO("./src/data/bookings.json");
+const bookingDAO = new BookingDAO(BookingModel);
 const bookingRepository = new BookingRepository(bookingDAO);
 const bookingService = new BookingService(bookingRepository, serviceService);
 

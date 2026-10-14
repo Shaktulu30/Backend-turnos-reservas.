@@ -16,7 +16,7 @@ export const addService = async (req, res) => {
 };
 
 export const getServiceById = async (req, res) => {
-  const serviceId = Number(req.params.sid);
+  const serviceId = req.params.sid;
   const service = await serviceService.getById(serviceId);
   if (service.error) {
     res.status(404).json({ status: "error", message: service.error });
@@ -26,7 +26,7 @@ export const getServiceById = async (req, res) => {
 };
 
 export const updateService = async (req, res) => {
-  const serviceId = Number(req.params.sid);
+  const serviceId = req.params.sid;
   const updatedService = req.body;
   const resultado = await serviceService.update(serviceId, updatedService);
   if (resultado.error) {
@@ -37,7 +37,7 @@ export const updateService = async (req, res) => {
 };
 
 export const deleteService = async (req, res) => {
-  const serviceId = Number(req.params.sid);
+  const serviceId = req.params.sid;
   const resultado = await serviceService.delete(serviceId);
   if (resultado.error) {
     res.status(404).json({ status: "error", message: resultado.error });
