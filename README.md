@@ -15,7 +15,7 @@ Cliente  ->  Ruta  ->  Controller  ->  Service  ->  Repository  ->  DAO  ->  Mon
 - **dao/**: acceso a datos con Mongoose. Es la única capa que conoce la base de datos.
 - **dao/models/**: schemas y models de Mongoose.
 
-La conexión a MongoDB está centralizada y la instanciación de las capas se hace una sola vez en un *composition root* (`config/container.js`), que inyecta las dependencias (DAO → Repository → Service).
+La conexión a MongoDB está centralizada y la instanciación de las capas se hace una sola vez en un _composition root_ (`config/container.js`), que inyecta las dependencias (DAO → Repository → Service).
 
 ## Instalación
 
@@ -48,7 +48,17 @@ Al arrancar, la app **primero conecta a MongoDB** y recién después levanta el 
 Cada servicio tiene esta forma:
 
 ```js
-{ _id, name, description, duration, price, category, available, createdAt, updatedAt }
+{
+  (_id,
+    name,
+    description,
+    duration,
+    price,
+    category,
+    available,
+    createdAt,
+    updatedAt);
+}
 ```
 
 El `_id` lo genera MongoDB automáticamente (tipo `ObjectId`); no se envía en el body. `available` es opcional: si no se envía, toma `true` por defecto (definido en el schema). `createdAt` / `updatedAt` los agrega Mongoose vía `timestamps`.
@@ -57,13 +67,13 @@ El `_id` lo genera MongoDB automáticamente (tipo `ObjectId`); no se envía en e
 
 Base: `/api/services`
 
-| Método | Ruta | Descripción | Éxito | Error |
-|--------|------|-------------|-------|-------|
-| GET | `/api/services` | Lista todos los servicios | 200 | — |
-| GET | `/api/services/:sid` | Devuelve un servicio por id | 200 | 404 si no existe |
-| POST | `/api/services` | Crea un servicio | 201 | 400 si faltan campos |
-| PUT | `/api/services/:sid` | Actualiza un servicio | 200 | 404 si no existe |
-| DELETE | `/api/services/:sid` | Elimina un servicio | 200 | 404 si no existe |
+| Método | Ruta                 | Descripción                 | Éxito | Error                |
+| ------ | -------------------- | --------------------------- | ----- | -------------------- |
+| GET    | `/api/services`      | Lista todos los servicios   | 200   | —                    |
+| GET    | `/api/services/:sid` | Devuelve un servicio por id | 200   | 404 si no existe     |
+| POST   | `/api/services`      | Crea un servicio            | 201   | 400 si faltan campos |
+| PUT    | `/api/services/:sid` | Actualiza un servicio       | 200   | 404 si no existe     |
+| DELETE | `/api/services/:sid` | Elimina un servicio         | 200   | 404 si no existe     |
 
 Ejemplo de body (POST / PUT):
 
@@ -91,11 +101,11 @@ El `status` arranca en `"pending"` por defecto (schema, con `enum`). Al crear un
 
 Base: `/api/bookings`
 
-| Método | Ruta | Descripción | Éxito | Error |
-|--------|------|-------------|-------|-------|
-| POST | `/api/bookings` | Crea una reserva | 201 | 400 si faltan campos |
-| GET | `/api/bookings/:bid` | Devuelve una reserva por id | 200 | 404 si no existe |
-| POST | `/api/bookings/:bid/services/:sid` | Agrega un servicio a la reserva | 200 | 404 si no existe la reserva o el servicio |
+| Método | Ruta                               | Descripción                     | Éxito | Error                                     |
+| ------ | ---------------------------------- | ------------------------------- | ----- | ----------------------------------------- |
+| POST   | `/api/bookings`                    | Crea una reserva                | 201   | 400 si faltan campos                      |
+| GET    | `/api/bookings/:bid`               | Devuelve una reserva por id     | 200   | 404 si no existe                          |
+| POST   | `/api/bookings/:bid/services/:sid` | Agrega un servicio a la reserva | 200   | 404 si no existe la reserva o el servicio |
 
 Ejemplo de body (crear reserva):
 
@@ -118,12 +128,46 @@ Todas las respuestas siguen el formato:
 
 `payload` en las respuestas exitosas, `message` en las de error.
 
-## Estructura del proyecto
+## Vistas (Handlebars)
 
+Además de la API REST, el proyecto renderiza vistas del lado del servidor con **Handlebars** (`express-handlebars`). Las vistas consumen datos **reales de MongoDB** a través de las mismas capas que la API (controller → service → repository → DAO); no tienen datos hardcodeados.
+
+Base: `/views`
+
+| Ruta                      | Descripción                                              |
+| ------------------------- | -------------------------------------------------------- |
+| GET `/views/services`     | Lista todos los servicios                                |
+| GET `/views/availability` | Lista solo los servicios disponibles (`available: true`) |
+
+El layout general está en `views/layouts/main.handlebars` y los estilos en `public/css/styles.css`.
+
+## Tiempo real (Socket.io)
+
+El proyecto incorpora **Socket.io** (server + cliente) para reflejar cambios en vivo sin recargar la página.
+
+Evento implementado: al **crear un servicio** (`POST /api/services`), el servidor emite el evento `nuevoServicio` y la vista `/views/services` agrega la tarjeta nueva automáticamente.
+
+### Cómo verificar el tiempo real
+
+1. Levantar el servidor (`node src/server.js`).
+2. Abrir `http://localhost:PORT/views/services` en el navegador y dejarlo abierto.
+3. Desde un cliente HTTP (Thunder Client, Postman, etc.), hacer un `POST` a `/api/services` con un body válido:
+
+```json
+{
+  "name": "Clase de spinning",
+  "description": "Clase grupal de ciclismo indoor",
+  "duration": 45,
+  "price": 9000,
+  "category": "grupal"
+}
 ```
+
+4. Sin tocar el navegador, la tarjeta del nuevo servicio aparece sola en la lista.
+
 src/
-  app.js                        configura Express y monta los routers
-  server.js                     conecta a MongoDB y levanta el servidor
+  app.js                        configura Express, Handlebars, estáticos y monta los routers
+  server.js                     conecta a MongoDB, levanta el servidor HTTP y Socket.io
   config/
     env.config.js               carga y valida las variables de entorno (incluye MONGO_URI)
     database.config.js          conexión a MongoDB con Mongoose (connectDB)
@@ -131,6 +175,7 @@ src/
   controllers/
     services.controller.js      request/response del recurso services
     bookings.controller.js      request/response del recurso bookings
+    views.controller.js         renderiza las vistas de Handlebars con datos reales   ← nuevo
   services/
     service.service.js          reglas de negocio de services
     booking.service.js          reglas de negocio de bookings
@@ -147,8 +192,18 @@ src/
   routes/
     services.router.js          endpoints del recurso services
     bookings.router.js          endpoints del recurso bookings
+    views.router.js             endpoints de las vistas (/views)                       ← nuevo
+  views/                                                                                ← nuevo
+    layouts/
+      main.handlebars           layout general
+    services.handlebars         vista de servicios
+    availability.handlebars     vista de servicios disponibles
+public/                                                                                 ← nuevo
+  css/
+    styles.css                  estilos de las vistas
+  js/
+    socket.js                   cliente de Socket.io (escucha el evento nuevoServicio)
 .env.example                    ejemplo de variables de entorno
 .gitignore
 package.json
 README.md
-```

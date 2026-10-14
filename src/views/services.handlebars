@@ -1,0 +1,19 @@
+<h1>Servicios disponibles</h1>
+
+<div id="services-list">
+  {{#each services}}
+    <div class="card">
+      <h2>{{name}}</h2>
+      <p>{{description}}</p>
+      <p class="muted">
+        Duración: {{duration}} min ·
+        Precio: ${{price}} ·
+        Categoría: {{category}} ·
+        Disponible: {{available}}
+      </p>
+    </div>
+  {{/each}}
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/socket.js"></script>

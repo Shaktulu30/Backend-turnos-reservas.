@@ -11,6 +11,7 @@ export const addService = async (req, res) => {
   if (resultado.error) {
     res.status(400).json({ status: "error", message: resultado.error });
   } else {
+    req.app.get("io").emit("nuevoServicio", resultado);
     res.status(201).json({ status: "success", payload: resultado });
   }
 };
