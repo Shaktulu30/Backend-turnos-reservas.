@@ -50,17 +50,7 @@ Al arrancar, la app **primero conecta a MongoDB** y recién después levanta el 
 Cada servicio tiene esta forma:
 
 ```js
-{
-  (_id,
-    name,
-    description,
-    duration,
-    price,
-    category,
-    available,
-    createdAt,
-    updatedAt);
-}
+{ _id, name, description, duration, price, category, available, createdAt, updatedAt }
 ```
 
 El `_id` lo genera MongoDB automáticamente (tipo `ObjectId`); no se envía en el body. `available` es opcional: si no se envía, toma `true` por defecto (definido en el schema). `createdAt` / `updatedAt` los agrega Mongoose vía `timestamps`.
@@ -143,11 +133,14 @@ El `status` arranca en `"pending"` por defecto (schema, con `enum`). Al crear un
 
 Base: `/api/bookings`
 
-| Método | Ruta                               | Descripción                     | Éxito | Error                                     |
-| ------ | ---------------------------------- | ------------------------------- | ----- | ----------------------------------------- |
-| POST   | `/api/bookings`                    | Crea una reserva                | 201   | 400 si datos inválidos                    |
-| GET    | `/api/bookings/:bid`               | Devuelve una reserva por id     | 200   | 404 si no existe                          |
-| POST   | `/api/bookings/:bid/services/:sid` | Agrega un servicio a la reserva | 200   | 404 si no existe la reserva o el servicio |
+| Método | Ruta                               | Descripción                                        | Éxito | Error                                     |
+| ------ | ---------------------------------- | -------------------------------------------------- | ----- | ----------------------------------------- |
+| POST   | `/api/bookings`                    | Crea una reserva                                   | 201   | 400 si datos inválidos                    |
+| GET    | `/api/bookings/:bid`               | Devuelve una reserva por id                        | 200   | 404 si no existe                          |
+| POST   | `/api/bookings/:bid/services/:sid` | Agrega un servicio a la reserva                    | 200   | 404 si no existe la reserva o el servicio |
+| PUT    | `/api/bookings/:bid/services/:sid` | Actualiza la cantidad de un servicio en la reserva | 200   | 400 / 404                                 |
+| DELETE | `/api/bookings/:bid/services/:sid` | Elimina un servicio de la reserva                  | 200   | 404                                       |
+| DELETE | `/api/bookings/:bid`               | Elimina una reserva                                | 200   | 404 si no existe                          |
 
 Ejemplo de body (crear reserva):
 
@@ -155,8 +148,16 @@ Ejemplo de body (crear reserva):
 {
   "clientName": "Juan Pérez",
   "clientEmail": "juan@mail.com",
-  "date": "2026-10-20",
+  "date": "2026-10-25",
   "time": "10:00"
+}
+```
+
+Ejemplo de body (actualizar cantidad):
+
+```json
+{
+  "quantity": 3
 }
 ```
 
@@ -172,6 +173,7 @@ Esquemas aplicados en:
 - `PUT /api/services/:sid` — actualizar servicio (campos opcionales)
 - `POST /api/bookings` — crear reserva
 - `POST /api/bookings/:bid/services/:sid` — agregar servicio a reserva
+- `PUT /api/bookings/:bid/services/:sid` — actualizar la cantidad de un servicio en la reserva
 
 ## Formato de respuestas
 
@@ -255,7 +257,7 @@ src/
     validate.middleware.js      valida el body con Zod (400 si falla)
   validations/
     service.validation.js       esquemas Zod de services (crear / actualizar)
-    booking.validation.js       esquemas Zod de bookings (crear / agregar servicio)
+    booking.validation.js       esquemas Zod de bookings (crear / agregar servicio / cantidad)
   views/
     layouts/
       main.handlebars           layout general
@@ -270,4 +272,3 @@ public/
 .gitignore
 package.json
 README.md
-```

@@ -30,3 +30,38 @@ export const addServiceToBooking = async (req, res) => {
     res.status(200).json({ status: "success", payload: resultado });
   }
 };
+
+export const updateServiceQuantity = async (req, res) => {
+  const { bid, sid } = req.params;
+  const { quantity } = req.body;
+  const resultado = await bookingService.updateServiceQuantity(
+    bid,
+    sid,
+    quantity,
+  );
+  if (resultado.error) {
+    res.status(404).json({ status: "error", message: resultado.error });
+  } else {
+    res.status(200).json({ status: "success", payload: resultado });
+  }
+};
+
+export const removeServiceFromBooking = async (req, res) => {
+  const { bid, sid } = req.params;
+  const resultado = await bookingService.removeServiceFromBooking(bid, sid);
+  if (resultado.error) {
+    res.status(404).json({ status: "error", message: resultado.error });
+  } else {
+    res.status(200).json({ status: "success", payload: resultado });
+  }
+};
+
+export const deleteBooking = async (req, res) => {
+  const { bid } = req.params;
+  const resultado = await bookingService.delete(bid);
+  if (resultado.error) {
+    res.status(404).json({ status: "error", message: resultado.error });
+  } else {
+    res.status(200).json({ status: "success", message: resultado.message });
+  }
+};

@@ -41,4 +41,40 @@ export default class BookingService {
 
     return await this.repository.update(bid, { services: booking.services });
   }
+
+  async updateServiceQuantity(bid, sid, quantity) {
+    const booking = await this.repository.getById(bid);
+    if (booking === null) {
+      return { error: "Reserva no encontrada" };
+    }
+    const item = booking.services.find((item) => item.service.equals(sid));
+    if (!item) {
+      return { error: "El servicio no está en la reserva" };
+    }
+    item.quantity = quantity;
+    return await this.repository.update(bid, { services: booking.services });
+  }
+
+  async removeServiceFromBooking(bid, sid) {
+    const booking = await this.repository.getById(bid);
+    if (booking === null) {
+      return { error: "Reserva no encontrada" };
+    }
+    const existe = booking.services.some((item) => item.service.equals(sid));
+    if (!existe) {
+      return { error: "El servicio no está en la reserva" };
+    }
+    const nuevosServicios = booking.services.filter(
+      (item) => !item.service.equals(sid),
+    );
+    return await this.repository.update(bid, { services: nuevosServicios });
+  }
+
+  async delete(id) {
+    const deleted = await this.repository.delete(id);
+    if (deleted === null) {
+      return { error: "Reserva no encontrada" };
+    }
+    return { message: "Reserva eliminada correctamente" };
+  }
 }

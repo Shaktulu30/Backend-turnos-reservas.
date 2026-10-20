@@ -21,3 +21,7 @@ export const bookingAddServiceSchema = z
     quantity: z.number().int().positive().optional(),
   })
   .default({});
+
+export const bookingUpdateQuantitySchema = z.object({
+  quantity: z.number().int().positive(),
+});
